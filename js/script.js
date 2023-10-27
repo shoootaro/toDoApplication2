@@ -62,27 +62,46 @@ function sortTodos(a, b) {
   }
 }
 
+function editTodo(todo, type){
+  todo.isEdit = type === "edit"
+  updateTodoList()
+}
+
 function updateTodoList() {
   let htmlStrings = ""
   todoList
-    .filter(todo => !todo.isDone !== (displayTarget === "inbox"))
+    .filter(todo => todo.isDone !== (displayTarget === "inbox"))
     .sort(sortTodos)
     .forEach(todo => {
       htmlStrings += createTodoHtmlString(todo)
       todoMain.innerHTML = htmlStrings
     })
   todoMain.innerHTML = htmlStrings
-  todoList.forEach(todo => {
+  todoList
+   .filter(todo => todo.isDone !== (displayTarget === "inbox"))
+   .forEach(todo => {
     const todoEl = document.getElementById(todo.id)
-    if(todoEl) {
+      if (todoEl) {
       todoEl.querySelectorAll("button").forEach(btn => {
         const type = btn.dataset.type
         btn.addEventListener("click", event => {
-          if (type.indexOf("inbox") >= 0 || type.indexOf("done") >= 0) {
-            updateTodoState(todo, type)
+            if (type.indexOf("edit") >= 0) {
+            editTodo(todo, type)
+            } else {
+              updateTodoState(todo, type)
           }
         })
       })
+        if (todo.isEdit) {
+        todoEl.querySelector(".input-edit").addEventListener("input", event => {
+          todo.text = event.currentTarget.value
+        })
+        todoEl
+          .querySelector(".input-priority")
+          .addEventListener("input", event => {
+            todo.priority = parseInt(event.currentTarget.value, 10)
+          })
+      }
     }
   })
 }
