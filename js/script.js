@@ -38,6 +38,11 @@ function createTodoHtmlString(todo) {
   htmlString += '<button data-type="' + doneType + '">'
   htmlString += doneButtonLabel
   htmlString += "</button></td>"
+  htmlString += "</td>"
+  htmlString += '<td class="cell-delete">'
+  htmlString += '<button data-type="delete">'
+  htmlString += '削除'
+  htmlString += "</button></td>"
   htmlString += "</tr>"
   return htmlString
 }
@@ -67,6 +72,11 @@ function editTodo(todo, type){
   updateTodoList()
 }
 
+function deleteTodo(todo) {
+  const index = todoList.findIndex((t) => t.id === todo.id)
+  todoList.splice(index, 1)
+}
+
 function updateTodoList() {
   let htmlStrings = ""
   todoList
@@ -86,7 +96,10 @@ function updateTodoList() {
         const type = btn.dataset.type
         btn.addEventListener("click", event => {
             if (type.indexOf("edit") >= 0) {
-            editTodo(todo, type)
+              editTodo(todo, type)
+            } else if (type.indexOf("delete") >= 0){
+              deleteTodo(todo)
+              updateTodoList(todo, type)
             } else {
               updateTodoState(todo, type)
           }
