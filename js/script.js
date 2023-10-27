@@ -1,5 +1,7 @@
 const todoList = []
 let tabButton, sortMenu, todoMain, inputForm
+let displayTarget = "inbox"
+let sortIndex = "created-desc"
 
 function createTodoHtmlString(todo) {
   let htmlString = ""
@@ -40,12 +42,35 @@ function createTodoHtmlString(todo) {
   return htmlString
 }
 
+function updateTodoState(todo, type) {
+  todo.isDone = type === "done"
+  updateTodoList()
+}
+
+function sortTodos(a, b) {
+  switch (sortIndex) {
+    case "created-desc":
+      return Date.parse(b.createdAt) - Date.parse(a.createdAt)
+    case "created-asc":
+      return Date.parse(a.createdAt) - Date.parse(b.createdAt)
+    case "priority-desc":
+      return b.priority - a.priority
+    case "priority-asc":
+      return a.priority - b.priority
+    default:
+      return todoList
+  }
+}
+
 function updateTodoList() {
   let htmlStrings = ""
-  todoList.forEach(todo => {
-    htmlStrings += createTodoHtmlString(todo)
-    todoMain.innerHTML = htmlStrings
-  })
+  todoList
+    .filter(todo => !todo.isDone !== (displayTarget === "inbox"))
+    .sort(sortTodos)
+    .forEach(todo => {
+      htmlStrings += createTodoHtmlString(todo)
+      todoMain.innerHTML = htmlStrings
+    })
   todoMain.innerHTML = htmlStrings
   todoList.forEach(todo => {
     const todoEl = document.getElementById(todo.id)
@@ -81,6 +106,17 @@ function handleSubmit(event) {
   addTodo(todoObj)
 }
 
+function handleTabClick(event) {
+  const me = event.currentTarget
+  displayTarget = me.dataset.target
+  updateTodoList()
+}
+
+function handleSort(e) {
+  sortIndex = e.currentTarget.value
+  updateTodoList()
+}
+
 function registerDOM() {
   tabButton = document.querySelector("#tab").querySelectorAll("button")
   sortMenu = document.querySelector("#sort-menu")
@@ -90,6 +126,10 @@ function registerDOM() {
 
 function bindEvents() {
   inputForm.addEventListener("submit", event => handleSubmit(event))
+  tabButton.forEach(tab => {
+    tab.addEventListener("click", event => handleTabClick(event))
+  })
+  sortMenu.addEventListener("change", event => handleSort(event))
 }
 
 function initialize() {
